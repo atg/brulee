@@ -14,10 +14,47 @@
 		
 		# Keywords
 		"if" { e(IF); };
+		"then" { e(THEN); };
 		"else" { e(ELSE); };
+		
 		"for" { e(FOR); };
+		"in" { e(IN); };
 		"while" { e(WHILE); };
 		"give" { e(GIVE); };
+		"break" { e(BREAK); };
+		"continue" { e(CONTINUE); };
+		"switch" { e(SWITCH); };
+		"case" { e(CASE); };
+		
+		"do" { e(DO); };
+		"async" { e(DO); };
+		"sync" { e(DO); };		
+		
+		"return" { e(RETURN); };
+		
+		"has" { e(HAS); };
+	
+		"class" { e(CLASS); };
+		"property" { e(PROPERTY); };
+		
+		"private" { e(PRIVATE); };
+		"readonly" { e(READONLY); };
+		"assign" { e(ASSIGN); };
+		"retain" { e(RETAIN); };
+		"copy" { e(COPY); };
+		"nonatomic" { e(NONATOMIC); };
+		
+		"weak" { e(WEAK); };
+		"strong" { e(STRONG); };
+		
+		"static" { e(STATIC); }
+		"volatile" { e(STATIC); }
+		"const" { e(CONST); }
+		
+		"alias" { e(ALIAS); }
+		"type" { e(TYPE); }
+		"data" { e(DATA); }
+		"enum" { e(ENUM); }
 		
 		
 		# Numerics
@@ -43,7 +80,36 @@
 		
 		
 		# Punctuation
+		"<-" { e(LT_DASH); };
+		"->" { e(DASH_GT); };
+		"=>" { e(EQ_GT); };
+		
+		"<=" { e(LT_EQ); };
+		">=" { e(GT_EQ); };
+		"<" { e(LT); };
+		">" { e(GT); };
+		"==" { e(EQ_EQ); };
+		"!=" { e(EXCLAIM_EQ); };
+		"===" { e(EQ_EQ_EQ); };
+		"!==" { e(EXCLAIM_EQ_EQ); };
+		
+		
+		"**" { e(STAR_STAR); };
+		
 		"!" { e(EXCLAIM); };
+		"&&" { e(AMP_AMP); };
+		"||" { e(BAR_BAR); };
+		
+		"+comp" { e(PLUS_COMP); };
+		"+and" { e(PLUS_AND); };
+		"+or" { e(PLUS_OR); };
+		"+xor" { e(PLUS_XOR); };
+		"+nand" { e(PLUS_NAND); };
+		"+nor" { e(PLUS_NOR); };
+		"+implies" { e(PLUS_IMPLIES); };
+		"+<<" { e(PLUS_LT_LT); };
+		"+>>" { e(PLUS_GT_GT); };
+			
 		"@" { e(AT); };
 		"#" { e(HASH); };
 		"$" { e(DOLLAR); };
@@ -64,9 +130,8 @@
 		":" { e(COLON); };
 		";" { e(SEMICOLON); };
 		"\\" { e(BACKSLASH); };
+		"|" { e(BAR); };
 		"/" { e(SLASH); };
-		"<" { e(LT); };
-		">" { e(GT); };
 		"," { e(COMMA); };
 		"." { e(DOT); };
 		"?" { e(QUESTIONMARK); };
@@ -76,6 +141,8 @@
 		# Comments
 		"--" any+ { e(COMMENT); };
 		"//" [^\n\r]+ { e(COMMENT); };
+		"#!" [^\n\r]+ { e(COMMENT); };
+		
 		"/*" any* :>> '*/' { e(COMMENT); }:
 		
 		# Identifiers
