@@ -1,0 +1,11 @@
+-- Classes
+-- http://rosettacode.org/wiki/Classes
+
+class MyClass
+	static Int myClassVariable
+	Int variable
+	
+	! init
+		@variable = 42
+	
+	- variable = @variable

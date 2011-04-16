@@ -1,0 +1,14 @@
+-- First-class functions
+-- http://rosettacode.org/wiki/First-class_functions
+-- Write a program to create an ordered collection A of functions of a real number. At least one function should be built-in and at least one should be user-defined; try using the sine, cosine, and cubing functions. Fill another collection B with the inverse of each function in A. Implement function composition as in Functional Composition. Finally, demonstrate that the result of applying the composition of each function in A and its inverse in B to a value, is the original value. (Within the limits of computational accuracy).
+
+cube(x) = x ** 3
+cuberoot(x) = x ** (1/3)
+compose(f, g) = x => f(g(x))
+
+functions = [sin, cos, cube]
+inverses = [asin, acos, cuberoot]
+composed = for f, g in zip(functions, inverses) give compose(f, g)
+
+for f in composed
+	print(f(0.5))
