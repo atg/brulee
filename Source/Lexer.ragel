@@ -2,6 +2,23 @@
 
 #import "Lexer.h"
 
+void brulee_lex_emit(unsigned code, std::vector<brulee_token>& tokens, unsigned char* p, unsigned char* ts, unsigned char* te)
+{
+	brulee_token t;
+	t.code = code;
+	
+	t.payload = malloc((te - ts + 1) * sizeof(unsigned char));
+	t.payload[te - ts] = 0;
+	memcpy(t.payload, ts, te - ts);
+	
+	t.rangeStart = ts - p;
+	t.rangeLength = te - ts;
+	
+	tokens.push_back(t);
+}
+
+#define e(t) brulee_lex_emit(t, tokens, ts, te)
+
 %%{
 	machine BruleeLexer;
 	write data;
@@ -27,8 +44,8 @@
 		"case" { e(CASE); };
 		
 		"do" { e(DO); };
-		"async" { e(DO); };
-		"sync" { e(DO); };		
+		"async" { e(ASYNC); };
+		"sync" { e(SYNC); };		
 		
 		"return" { e(RETURN); };
 		
@@ -48,7 +65,7 @@
 		"strong" { e(STRONG); };
 		
 		"static" { e(STATIC); }
-		"volatile" { e(STATIC); }
+		"volatile" { e(VOLATILE); }
 		"const" { e(CONST); }
 		
 		"alias" { e(ALIAS); }
@@ -78,6 +95,9 @@
 		
 		## TODO: Decide on string literal formats
 		
+		"```" any* :>> "```" { e(OBJC); };
+		"`" any* :>> "`" { e(OBJC); };
+		
 		
 		# Punctuation
 		"<-" { e(LT_DASH); };
@@ -93,7 +113,12 @@
 		"===" { e(EQ_EQ_EQ); };
 		"!==" { e(EXCLAIM_EQ_EQ); };
 		
-		
+		"+" { e(PLUS); };
+		"-" { e(DASH); };
+		"*" { e(STAR); };
+		"/" { e(SLASH); };
+		"mod" { e(MOD); };
+		"divides" { e(DIVIDES); };
 		"**" { e(STAR_STAR); };
 		
 		"!" { e(EXCLAIM); };
@@ -116,41 +141,62 @@
 		"%" { e(PERCENT); };
 		"^" { e(CARET); };
 		"&" { e(AMP); };
-		"*" { e(STAR); };
+		
 		"(" { e(LBRACKET); };
 		")" { e(RBRACKET); };
 		"[" { e(LSQUARE); };
 		"]" { e(RSQUARE); };
 		"{" { e(LCURLY); };
 		"}" { e(RCURLY); };
-		"-" { e(DASH); };
+		
 		"_" { e(UNDERSCORE); };
-		"+" { e(PLUS); };
 		"=" { e(EQ); };
 		":" { e(COLON); };
 		";" { e(SEMICOLON); };
 		"\\" { e(BACKSLASH); };
 		"|" { e(BAR); };
-		"/" { e(SLASH); };
 		"," { e(COMMA); };
 		"." { e(DOT); };
 		"?" { e(QUESTIONMARK); };
-		"`" { e(BACKTICK); };
 		"~" { e(TILDE); };
+		
 		
 		# Comments
 		"--" any+ { e(COMMENT); };
 		"//" [^\n\r]+ { e(COMMENT); };
 		"#!" [^\n\r]+ { e(COMMENT); };
 		
-		"/*" any* :>> '*/' { e(COMMENT); }:
+		"/*" any* :>> "*/" { e(COMMENT); };
 		
+				
 		# Identifiers
 		"_" { lexerror("lex.single-underscore") };
-		([a-zA-Z_][a-zA-Z0-9_-]+[a-zA-Z0-9_]) | ([a-zA-Z_][a-zA-Z0-9_]*) { e(IDENT); };
+		([a-zA-Z_][a-zA-Z0-9_\-]+[a-zA-Z0-9_]) | ([a-zA-Z_][a-zA-Z0-9_]*) { e(IDENT); };
 		
 		any { lexerror("lex.unrecognized-symbol"); };
 		
 	*|
 
 %%}
+
+void brulee_lex_tokenize(std::string& input, std::vector<brulee_token>& tokens)
+{
+	//Start
+	unsigned char *p = input.c_str();
+	
+	//End
+	unsigned char *pe = p + input.length();
+	unsigned char *eof = pe;
+		
+	//State
+	int cs = 0, act, have = 0, curline = 1;
+	unsigned char *ts, *te = 0;
+	int done = 0;
+	
+	//Run the machine
+	%% write init;
+	%% write exec;
+	
+	//Return the output
+	return tokens;
+}
