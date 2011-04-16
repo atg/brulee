@@ -1,0 +1,15 @@
+assert 1 + 1 = 2
+assert 12345 + 67890 = 80235
+
+--- Unlike in C, leading zeroes do not indicate octal, that's what 0o does
+assert 042 = error 'lex.leading-zeroes'
+assert 000000000000000000000000000042 = error 'lex.leading-zeroes'
+
+--- The single underscore is reserved
+assert _ = error 'lex.single-underscore'
+
+--- Identifiers can contain dashes, so long as they do not start or end the identifier. Also, double dashes are prohibited
+foo-bar = 42
+assert foo-bar = 42
+
+---

@@ -1,0 +1,89 @@
+/* The Brulee lexer is written in Ragel, then compiled to C. We then call these using Haskell's FFI. This let's us avoid parsec's (relatively) weak lexing support */
+
+#import "Lexer.h"
+
+%%{
+	machine BruleeLexer;
+	write data;
+	
+	alphtype unsigned char;
+	
+	ndigit = "0" | ([1-9] digit*);
+	
+	main := |*
+		
+		# Keywords
+		"if" { e(IF); };
+		"else" { e(ELSE); };
+		"for" { e(FOR); };
+		"while" { e(WHILE); };
+		"give" { e(GIVE); };
+		
+		
+		# Numerics
+		ndigits { e(INTEGER); };
+		ndigits "." ndigits { e(DECIMAL); };
+		
+		"0o" ndigits { e(OCTAL_INT); };
+		"0o" ndigits "." digit+ { e(OCTAL_DECIMAL) };
+				
+		"0x" ndigits { e(HEX_INT); };
+		"0x" ndigits "." digit+ { e(HEX_DECIMAL) };
+		
+		"0b" ndigits { e(BINARY_INT); };
+		"0b" ndigits "." digit+ { e(BINARY_DECIMAL) };
+		
+		("0" [oxb])? "0" digit+ { lexerror("lex.leading-zeroes"); };
+		("0" [oxb])? "0" digit+ "." digit+ { lexerror("lex.leading-zeroes"); };
+		
+		
+		# Strings
+		
+		## TODO: Decide on string literal formats
+		
+		
+		# Punctuation
+		"!" { e(EXCLAIM); };
+		"@" { e(AT); };
+		"#" { e(HASH); };
+		"$" { e(DOLLAR); };
+		"%" { e(PERCENT); };
+		"^" { e(CARET); };
+		"&" { e(AMP); };
+		"*" { e(STAR); };
+		"(" { e(LBRACKET); };
+		")" { e(RBRACKET); };
+		"[" { e(LSQUARE); };
+		"]" { e(RSQUARE); };
+		"{" { e(LCURLY); };
+		"}" { e(RCURLY); };
+		"-" { e(DASH); };
+		"_" { e(UNDERSCORE); };
+		"+" { e(PLUS); };
+		"=" { e(EQ); };
+		":" { e(COLON); };
+		";" { e(SEMICOLON); };
+		"\\" { e(BACKSLASH); };
+		"/" { e(SLASH); };
+		"<" { e(LT); };
+		">" { e(GT); };
+		"," { e(COMMA); };
+		"." { e(DOT); };
+		"?" { e(QUESTIONMARK); };
+		"`" { e(BACKTICK); };
+		"~" { e(TILDE); };
+		
+		# Comments
+		"--" any+ { e(COMMENT); };
+		"//" [^\n\r]+ { e(COMMENT); };
+		"/*" any* :>> '*/' { e(COMMENT); }:
+		
+		# Identifiers
+		"_" { lexerror("lex.single-underscore") };
+		([a-zA-Z_][a-zA-Z0-9_-]+[a-zA-Z0-9_]) | ([a-zA-Z_][a-zA-Z0-9_]*) { e(IDENT); };
+		
+		any { lexerror("lex.unrecognized-symbol"); };
+		
+	*|
+
+%%}
